@@ -190,19 +190,19 @@ stocksSpark.show(3)
 district_number = []
 district_plt_lat = []
 district_plt_lon = []
-dfTemp = stocksSpark.toPandas()
+price_per_district = stocksSpark.toPandas()
 for k in range(0, dfTemp.shape[0]):
-    district_number.append(getDistrict(dfTemp["longitude"][k], dfTemp["latitude"][k], districS))
-dfTemp["district_number"] = pd.Series(district_number)
-dfTemp["district_plt_lat"] = dfTemp["district_number"].apply(lambda x: districS[x]["latplt"])
-dfTemp["district_plt_lon"] = dfTemp["district_number"].apply(lambda x: districS[x]["lonplt"])
-dfTemp.head()
+    district_number.append(getDistrict(price_per_district["longitude"][k], price_per_district["latitude"][k], districS))
+price_per_district["district_number"] = pd.Series(district_number)
+price_per_district["district_plt_lat"] = price_per_district["district_number"].apply(lambda x: districS[x]["latplt"])
+price_per_district["district_plt_lon"] = price_per_district["district_number"].apply(lambda x: districS[x]["lonplt"])
+price_per_district.head()
 
 # COMMAND ----------
 
-testDFR = dfTemp.groupby("district_number").agg({"price": "mean", "longitude": "mean", "latitude": "mean", "district_plt_lat": "mean", "district_plt_lon": "mean"})
-testDFR.plot(kind="scatter", x="district_plt_lon", y="district_plt_lat",
-    s=testDFR['price']/200, label="price",
+mean_price_per_district = price_per_district.groupby("district_number").agg({"price": "mean", "longitude": "mean", "latitude": "mean", "district_plt_lat": "mean", "district_plt_lon": "mean"})
+mean_price_per_district.plot(kind="scatter", x="district_plt_lon", y="district_plt_lat",
+    s=mean_price_per_district['price']/200, label="price",
     c="price", cmap=plt.get_cmap("jet"),
     colorbar=True, alpha=0.4, figsize=(10,7),
 )
@@ -212,9 +212,9 @@ plt.show()
 
 # COMMAND ----------
 
-testDFR = dfTemp.groupby("district_number").agg({"price": "max", "longitude": "mean", "latitude": "mean", "district_plt_lat": "mean", "district_plt_lon": "mean"})
-testDFR.plot(kind="scatter", x="district_plt_lon", y="district_plt_lat",
-    s=testDFR['price']/1000, label="price",
+max_price_per_district = price_per_district.groupby("district_number").agg({"price": "max", "longitude": "mean", "latitude": "mean", "district_plt_lat": "mean", "district_plt_lon": "mean"})
+max_price_per_district.plot(kind="scatter", x="district_plt_lon", y="district_plt_lat",
+    s=max_price_per_district['price']/1000, label="price",
     c="price", cmap=plt.get_cmap("jet"),
     colorbar=True, alpha=0.4, figsize=(10,7),
 )
@@ -224,9 +224,9 @@ plt.show()
 
 # COMMAND ----------
 
-testDFR = dfTemp.groupby("district_number").agg({"price": "min", "longitude": "mean", "latitude": "mean", "district_plt_lat": "mean", "district_plt_lon": "mean"})
-testDFR.plot(kind="scatter", x="district_plt_lon", y="district_plt_lat",
-    s=testDFR['price']/1000, label="price",
+min_price_per_district = price_per_district.groupby("district_number").agg({"price": "min", "longitude": "mean", "latitude": "mean", "district_plt_lat": "mean", "district_plt_lon": "mean"})
+min_price_per_district.plot(kind="scatter", x="district_plt_lon", y="district_plt_lat",
+    s=min_price_per_district['price']/1000, label="price",
     c="price", cmap=plt.get_cmap("jet"),
     colorbar=True, alpha=0.4, figsize=(10,7),
 )
@@ -366,6 +366,25 @@ plt.show()
 # COMMAND ----------
 
 # MAGIC %md
+# MAGIC ### Price map
+
+# COMMAND ----------
+
+stocksSpark.show(1)
+
+# COMMAND ----------
+
+stocksSpark.toPandas().plot(kind="scatter", x="longitude", y="latitude",
+    s=stocksSpark.toPandas()['price']/10000, label="price",
+    c="price", cmap=plt.get_cmap("jet"),
+    colorbar=True, alpha=0.4, figsize=(10,7),
+)
+plt.legend()
+plt.show()
+
+# COMMAND ----------
+
+# MAGIC %md
 # MAGIC ### Median household function of location
 
 # COMMAND ----------
@@ -375,6 +394,155 @@ realEstateDF.groupBy("ocean_proximity").mean("median_house_value").withColumnRen
 # COMMAND ----------
 
 realEstateDF.groupBy("ocean_proximity").mean("median_house_value").withColumnRenamed("avg(median_house_value)", "median_house_value").orderBy(col("median_house_value").desc()).toPandas().plot.bar()
+
+# COMMAND ----------
+
+price_per_district.head(3)
+
+# COMMAND ----------
+
+district_number_real_estate = []
+district_plt_lat_real_estate = []
+district_plt_lon_real_estate = []
+price_per_district_real_estate = realEstateDF.toPandas().dropna()
+for k in range(0, price_per_district_real_estate.shape[0]):
+    district_number_real_estate.append(getDistrict(price_per_district_real_estate["longitude"][k], price_per_district_real_estate["latitude"][k], districS))
+price_per_district_real_estate["district_number"] = pd.Series(district_number_real_estate)
+price_per_district_real_estate.dropna(subset=["district_number"], inplace=True)
+price_per_district_real_estate["district_plt_lat"] = price_per_district_real_estate["district_number"].apply(lambda x: districS[x]["latplt"])
+price_per_district_real_estate["district_plt_lon"] = price_per_district_real_estate["district_number"].apply(lambda x: districS[x]["lonplt"])
+price_per_district_real_estate.head()
+
+# COMMAND ----------
+
+testdff = pd.merge(price_per_district_real_estate, price_per_district, how='inner', left_on=['district_number'], right_on = ['district_number'])
+testdff.head()
+
+# COMMAND ----------
+
+testdff.dropna(inplace=True)
+testdff.groupby("ocean_proximity").agg({"price": "mean"})#, "longitude": "mean", "latitude": "mean", "district_plt_lat": "mean", "district_plt_lon": "mean"})
+#testdff2.plot(kind="scatter", x="district_plt_lon", y="district_plt_lat",
+#    s=mean_price_per_district['price']/200, label="price",
+#    c="price", cmap=plt.get_cmap("jet"),
+#    colorbar=True, alpha=0.4, figsize=(10,7),
+#)
+#plt.legend()
+#plt.title("Mean price per district")
+#plt.show()
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC # Mounting GOLD
+
+# COMMAND ----------
+
+containerSourceGold = "wasbs://gold@storagegreathouse.blob.core.windows.net/"
+containerMountGold = "/mnt/greathouse_gold"
+
+# COMMAND ----------
+
+if (containerMountGold not in list_mounted):
+    dbutils.fs.mount(
+      source = containerSourceGold,
+      mount_point = containerMountGold,
+      extra_configs = {"fs.azure.account.key.storagegreathouse.blob.core.windows.net":dbutils.secrets.get(scope = "scope-databricks", key="key1")}
+    )
+else:
+    print("Already mounted")
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Saving in  GOld
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ##### Question 1
+
+# COMMAND ----------
+
+stocksDF_mean_price_per_rooms.write.mode("overwrite").format("csv").save("/mnt/greathouse_gold/stocksDF_mean_price_per_rooms.csv", header = 'true')
+stocksDF_mean_price_per_rooms.show()
+
+# COMMAND ----------
+
+stocksDF_mean_price_per_bedrooms.write.mode("overwrite").format("csv").save("/mnt/greathouse_gold/stocksDF_mean_price_per_bedrooms.csv", header = 'true')
+stocksDF_mean_price_per_bedrooms.show()
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ##### Question 2
+
+# COMMAND ----------
+
+spark.createDataFrame(mean_price_per_district).write.mode("overwrite").format("csv").save("/mnt/greathouse_gold/mean_price_per_district.csv", header = 'true')
+spark.createDataFrame(mean_price_per_district).show(3)
+
+# COMMAND ----------
+
+spark.createDataFrame(max_price_per_district).write.mode("overwrite").format("csv").save("/mnt/greathouse_gold/max_price_per_district.csv", header = 'true')
+spark.createDataFrame(max_price_per_district).show(3)
+
+# COMMAND ----------
+
+spark.createDataFrame(min_price_per_district).write.mode("overwrite").format("csv").save("/mnt/greathouse_gold/min_price_per_district.csv", header = 'true')
+spark.createDataFrame(min_price_per_district).show(3)
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ##### Question 3
+
+# COMMAND ----------
+
+stocksSpark.groupBy("Rooms").count().orderBy(col("Rooms").desc()).write.mode("overwrite").format("csv").save("/mnt/greathouse_gold/most_house_per_rooms.csv", header = 'true')
+
+# COMMAND ----------
+
+stocksSpark.groupBy("Bedrooms").count().orderBy(col("Bedrooms").desc()).write.mode("overwrite").format("csv").save("/mnt/greathouse_gold/most_house_per_bedrooms.csv", header = 'true')
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ##### Question 4
+
+# COMMAND ----------
+
+spark.createDataFrame(price_per_number_of_rooms).write.mode("overwrite").format("csv").save("/mnt/greathouse_gold/rooms_per_price_range.csv", header = 'true')
+spark.createDataFrame(price_per_number_of_bedrooms).write.mode("overwrite").format("csv").save("/mnt/greathouse_gold/bedrooms_per_price_range.csv", header = 'true')
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ##### Question 5
+
+# COMMAND ----------
+
+#price map from the real estate dataframe ?
+stocksSpark.write.mode("overwrite").format("csv").save("/mnt/greathouse_gold/stocks_clean_initial_df.csv", header = 'true')
+
+# COMMAND ----------
+
+stocksSpark.toPandas().plot(kind="scatter", x="longitude", y="latitude",
+    s=stocksSpark.toPandas()['price']/10000, label="price",
+    c="price", cmap=plt.get_cmap("jet"),
+    colorbar=True, alpha=0.4, figsize=(10,7),
+)
+plt.legend()
+plt.show()
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ##### Mean house hold per location
+
+# COMMAND ----------
+
+realEstateDF.groupBy("ocean_proximity").mean("median_house_value").withColumnRenamed("avg(median_house_value)", "median_house_value").orderBy(col("median_house_value").desc()).write.mode("overwrite").format("csv").save("/mnt/greathouse_gold/median_house_value_per_location.csv", header = 'true')
 
 # COMMAND ----------
 
