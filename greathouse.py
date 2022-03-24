@@ -1,4 +1,9 @@
 # Databricks notebook source
+# MAGIC %md
+# MAGIC # Bronze to silver
+
+# COMMAND ----------
+
 containerSourceBronze = "wasbs://bronze@storagegreathouse.blob.core.windows.net/"
 containerMountBronze = "/mnt/greathouse_bronze"
 
