@@ -200,6 +200,10 @@ price_per_district.head()
 
 # COMMAND ----------
 
+#price_per_district["district_number"].value_counts
+
+# COMMAND ----------
+
 mean_price_per_district = price_per_district.groupby("district_number").agg({"price": "mean", "longitude": "mean", "latitude": "mean", "district_plt_lat": "mean", "district_plt_lon": "mean"})
 mean_price_per_district.plot(kind="scatter", x="district_plt_lon", y="district_plt_lat",
     s=mean_price_per_district['price']/200, label="price",
@@ -268,7 +272,7 @@ stocksSpark.toPandas().head(3)
 
 # COMMAND ----------
 
-with_price_range = stocksSpark.toPandas().copy()
+with_price_range = stocksSpark.toPandas().copy().sort_values(by="price")
 with_price_range["priceRanges"] = pd.cut(stocksSpark.toPandas()["Rooms"], bins=15, labels=False)
 with_price_range.head()
 
@@ -288,7 +292,7 @@ price_per_number_of_rooms.plot.scatter(x="Rooms", y="price")
 
 # COMMAND ----------
 
-with_price_range_bedrooms = stocksSpark.toPandas().copy()
+with_price_range_bedrooms = stocksSpark.toPandas().copy().sort_values(by="price")
 with_price_range_bedrooms["priceRanges"] = pd.cut(stocksSpark.toPandas()["Bedrooms"], bins=15, labels=False)
 with_price_range_bedrooms.head()
 
@@ -474,7 +478,7 @@ stocksDF_mean_price_per_bedrooms.show()
 
 # COMMAND ----------
 
-stocksDF_mean_price_per_bedrooms.coalesce(1).write.mode("overwrite").format("csv").save("/mnt/greathouse_gold/address.csv", header = 'true')
+stocksDF_mean_price_per_bedrooms.coalesce(1).write.mode("overwrite").format("csv").save("/mnt/greathouse_gold/address", header = 'true')
 
 # COMMAND ----------
 
