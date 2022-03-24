@@ -1,9 +1,22 @@
 # Databricks notebook source
-dbutils.fs.mount(
-  source = "wasbs://bronze@storagegreathouse.blob.core.windows.net/",
-  mount_point = "/mnt/greathouse_raw",
-  extra_configs = {"fs.azure.account.key.storagegreathouse.blob.core.windows.net":dbutils.secrets.get(scope = "scope-databricks", key="key1")}
-)
+containerSourceBronze = "wasbs://bronze@storagegreathouse.blob.core.windows.net/"
+containerMountBronze = "/mnt/greathouse_bronze"
+
+# COMMAND ----------
+
+list_mounted = list(map(lambda x: x.mountPoint, dbutils.fs.mounts()))
+list_mounted
+
+# COMMAND ----------
+
+if (containerMountBronze not in list_mounted):
+    dbutils.fs.mount(
+      source = containerSourceBronze,
+      mount_point = containerMountBronze,
+      extra_configs = {"fs.azure.account.key.storagegreathouse.blob.core.windows.net":dbutils.secrets.get(scope = "scope-databricks", key="key1")}
+    )
+else:
+    print("Already mounted")
 
 # COMMAND ----------
 
@@ -68,17 +81,18 @@ dbutils.fs.mount(
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC PYTHON
+# MAGIC # PYTHON
 
 # COMMAND ----------
 
 import pandas as pd
 import os
+from pyspark.sql.functions import *
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC <b style="color:orange">Loading coordinates greathouse holdings</b>
+# MAGIC ## Loading coordinates greathouse holdings
 
 # COMMAND ----------
 
@@ -86,15 +100,20 @@ df1 = spark.read \
     .option("delimiter", ";") \
     .option("inferSchema", True) \
     .option("header", True) \
-    .csv("/mnt/greathouse_raw/GreatHouse Holdings District.csv").toPandas()
-print(df1.shape)
-print(df1.drop_duplicates().shape)
-df1.head()
+    .csv("/mnt/greathouse_bronze/GreatHouse Holdings District.csv")
+print(df1.count())
+print(df1.dropDuplicates().count())
+df1.show(3)
+
+# COMMAND ----------
+
+df1.describe(['longitude', 'latitude']).show()
+df1.distinct().count()
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC <b style="color:orange">Loading coordinates Roger&Brothers</b>
+# MAGIC ## Loading coordinates Roger&Brothers
 
 # COMMAND ----------
 
@@ -102,25 +121,37 @@ df3 = spark.read \
     .option("delimiter", ";") \
     .option("inferSchema", True) \
     .option("header", True) \
-    .csv("/mnt/greathouse_raw/Roger&Brothers District.csv").toPandas()
-print(df3.shape)
-print(df3.drop_duplicates().shape)
-df3.head()
+    .csv("/mnt/greathouse_raw/Roger&Brothers District.csv")
+print(df3.count())
+print(df3.dropDuplicates().count())
+df3.show(3)
+
+# COMMAND ----------
+
+df3.describe(['longitude', 'latitude']).show()
+df3.distinct().count()
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC <b style="color:orange">Concatenate coordinate dataframes</b>
+# MAGIC ## Concatenate coordinate dataframes
 
 # COMMAND ----------
 
-district_locations_both = pd.concat([df1, df3], ignore_index=True).drop_duplicates()
-print(district_locations_both.shape)
+district_locations_both = df1.union(df3)
+print(district_locations_both.count())
+print(df3.count() + df1.count())
+print(district_locations_both.dropDuplicates().count())
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC <b style="color:orange">loading real estate ad csv</b>
+# MAGIC ##### Conclusion: coordinate contained in one dataframe are also contained in the other
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## loading real estate ad csv
 
 # COMMAND ----------
 
@@ -128,80 +159,44 @@ df2 = spark.read \
     .option("delimiter", ",") \
     .option("inferSchema", True) \
     .option("header", True) \
-    .csv("/mnt/greathouse_raw/Real Estate Ad.csv").toPandas()
-print(df2.shape)
-df2.head(10)
+    .csv("/mnt/greathouse_raw/Real Estate Ad.csv")
+print(df2.count())
+print(df2.dropDuplicates().count())
+df2.show(3)
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC <b style="color:orange">filter real estate ad csv ==> does nothing</b>
+# MAGIC ## Filter real estate ad csv on coordinates provided in districts dataframes
 
 # COMMAND ----------
 
-df2_filtered = pd.merge(district_locations_both, df2,  how='left', left_on=['longitude','latitude'], right_on = ['longitude','latitude'])
-df2_filtered.shape
-
-# COMMAND ----------
-
-df2_filtered.head(3)
-
-# COMMAND ----------
-
-df2.dtypes
+df2.join(district_locations_both, [df2.longitude == district_locations_both.longitude, df2.latitude == district_locations_both.latitude], "inner").dropDuplicates().count()
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC <b style="color:orange">Create a column that is a concatenation of longitude and latitude columns to be used with groupby</b>
+# MAGIC ##### Conclusion: 0 rows are removed from the Real Estate Ad dataframe after filtering with coordinates provided in districts dataframe
+# MAGIC ##### Conclusion: coordinates dataframes will not be considered for further analysis are they are useless
 
 # COMMAND ----------
 
-df2_grouped = df2.copy()
-df2_grouped["coordConcat"] = df2_grouped["longitude"].apply(str) + df2_grouped["latitude"].apply(str)
-df2_grouped
+df2.printSchema()
 
 # COMMAND ----------
 
-df2_grouped["coordConcat"].value_counts()
+print(df2.dropDuplicates().count())
+print(df2.dropna().count())
 
 # COMMAND ----------
 
-# MAGIC %md
-# MAGIC <b style="color:orange">Groupby and mean on numerical values / most frequent on categorical values</b>
-
-# COMMAND ----------
-
-# groupby sur les coordinates identiques 
-#       => mean sur les valeurs numériques
-#       => most frequent sur les valeurs catégoriques
-df2_cleaned = df2_grouped.groupby("coordConcat").agg({'longitude': 'mean',
-                                'latitude': 'mean',
-                                'housing_median_age': 'mean',
-                                'total_rooms': 'mean',
-                                'total_bedrooms': 'mean',
-                                'population': 'mean',
-                                'households': 'mean',
-                                'median_income': 'mean',
-                                'median_house_value': 'mean',
-                                'ocean_proximity': lambda x:x.value_counts().index[0]
-                               }).reset_index().drop(columns="coordConcat")
-df2_cleaned.head()
-
-# COMMAND ----------
-
-df2_cleaned.ocean_proximity.value_counts()
-
-# COMMAND ----------
-
-# dataframe contenant les informations sur les districts (en partant sur la base que une couple de coordinate identique sont un distric)
-districts_informations = df2_cleaned.copy()
-districts_informations.head(4)
+real_estate_final = df2.dropna()
+real_estate_final.describe().show()
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## loading stocks greathouse holding
+# MAGIC ## Loading stocks greathouse holding
 
 # COMMAND ----------
 
@@ -209,14 +204,15 @@ df4 = spark.read \
     .option("delimiter", ";") \
     .option("header", True) \
     .option("inferSchema", True) \
-    .csv("/mnt/greathouse_raw/Stock GreatHouse Holdings.csv").toPandas()
-print(df4.shape)
-df4.head()
+    .csv("/mnt/greathouse_raw/Stock GreatHouse Holdings.csv")
+print(df4.count())
+print(df4.dropDuplicates().count())
+df4.show(3)
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## loading stocks ROGER & brothers
+# MAGIC ## Loading stocks ROGER & brothers
 
 # COMMAND ----------
 
@@ -224,52 +220,75 @@ df5 = spark.read \
     .option("delimiter", ";") \
     .option("header", True) \
     .option("inferSchema", True) \
-    .csv("/mnt/greathouse_raw/Stock Roger&Brothers.csv").toPandas()
-print(df5.shape)
-df5.head()
+    .csv("/mnt/greathouse_raw/Stock Roger&Brothers.csv")
+print(df5.count())
+print(df5.dropDuplicates().count())
+df5.show(3)
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## concat
+# MAGIC ## Concatenation of the two stocks dataframes
 
 # COMMAND ----------
 
-# La concatenation des dataframes stocks house est le deuxième dataframe que l'on veut
-stock_houses_to_sell = pd.concat([df4, df5], ignore_index=True)
-stock_houses_to_sell.head(3)
+stock_houses_to_sell = df4.union(df5)
+print(stock_houses_to_sell.count())
+print(df4.count() + df5.count())
+print(stock_houses_to_sell.dropDuplicates().count())
+print(stock_houses_to_sell.dropna().count())
 
 # COMMAND ----------
 
-stock_houses_to_sell.shape
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC ## mounting silver
-
-# COMMAND ----------
-
-dbutils.fs.mount(
-  source = "wasbs://silver@storagegreathouse.blob.core.windows.net/",
-  mount_point = "/mnt/greathouse_silver",
-  extra_configs = {"fs.azure.account.key.storagegreathouse.blob.core.windows.net":dbutils.secrets.get(scope = "scope-databricks", key="key1")}
-)
+stock_houses_to_sell.describe().show()
+stock_houses_to_sell.distinct().count()
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## saving to silver
+# MAGIC ##### Here we have a bad formatting for prices, not recognized as float. We convert the format
 
 # COMMAND ----------
 
-stocks_final = spark.createDataFrame(stock_houses_to_sell)
-district_final = spark.createDataFrame(df2)
+# cleaning stocks df + type conversion
+stock_houses_to_sell_c = stock_houses_to_sell.withColumn("price",regexp_replace("price", ",", ".")).withColumn("price",col("price").cast("double"))
+stock_houses_to_sell_c.describe().show()
+stock_houses_to_sell_c.distinct().count()
+
+# COMMAND ----------
+
+stocks_final = stock_houses_to_sell_c
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Mounting silver
+
+# COMMAND ----------
+
+containerSourceSilver = "wasbs://silver@storagegreathouse.blob.core.windows.net/"
+containerMountSilver = "/mnt/greathouse_silver"
+
+# COMMAND ----------
+
+if (containerMountSilver not in list_mounted):
+    dbutils.fs.mount(
+      source = containerSourceSilver,
+      mount_point = containerMountSilver,
+      extra_configs = {"fs.azure.account.key.storagegreathouse.blob.core.windows.net":dbutils.secrets.get(scope = "scope-databricks", key="key1")}
+    )
+else:
+    print("Already mounted")
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Saving to silver
 
 # COMMAND ----------
 
 stocks_final.write.mode("overwrite").format("csv").save("/mnt/greathouse_silver/stocks_final.csv", header = 'true')
-district_final.write.mode("overwrite").format("csv").save("/mnt/greathouse_silver/district_final.csv", header = 'true')
+real_estate_final.write.mode("overwrite").format("csv").save("/mnt/greathouse_silver/real_estate_final.csv", header = 'true')
 
 # COMMAND ----------
 
@@ -280,7 +299,3 @@ test = spark.read \
     .csv("/mnt/greathouse_silver/stocks_final.csv").toPandas()
 print(test.shape)
 test.tail()
-
-# COMMAND ----------
-
-
