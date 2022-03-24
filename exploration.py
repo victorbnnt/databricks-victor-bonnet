@@ -474,6 +474,10 @@ stocksDF_mean_price_per_bedrooms.show()
 
 # COMMAND ----------
 
+stocksDF_mean_price_per_bedrooms.coalesce(1).write.mode("overwrite").format("csv").save("/mnt/greathouse_gold/address.csv", header = 'true')
+
+# COMMAND ----------
+
 # MAGIC %md
 # MAGIC ##### Question 2
 
