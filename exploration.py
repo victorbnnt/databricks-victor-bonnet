@@ -61,6 +61,10 @@ stocksDF_new.shape
 
 # COMMAND ----------
 
+stocksDF_new.boxplot(column="Rooms")
+
+# COMMAND ----------
+
 stocksDF_new[stocksDF_new["Rooms"] < (stocksDF_new["Rooms"].mean() + 3*stocksDF_new["Rooms"].std())][stocksDF_new["Rooms"] > (stocksDF_new["Rooms"].mean() - 3*stocksDF_new["Rooms"].std())].boxplot(column="Rooms")
 stocksDF_new[stocksDF_new["Rooms"] < (stocksDF_new["Rooms"].mean() + 3*stocksDF_new["Rooms"].std())][stocksDF_new["Rooms"] > (stocksDF_new["Rooms"].mean() - 3*stocksDF_new["Rooms"].std())].shape
 
