@@ -168,10 +168,26 @@ display(stocksDF_mean_price_per_bedrooms)
 
 // COMMAND ----------
 
-
+// MAGIC %md
+// MAGIC # Analyse on district dataframe
 
 // COMMAND ----------
 
+// MAGIC %md
+// MAGIC ### Creating districts by coordinate ranges
+
+// COMMAND ----------
+
+val minLat = 
+
+// COMMAND ----------
+
+val minLat = stocksDF_new_v2.select("latitude").map(f => math.floor(f.getDouble(0))).collect().min
+val maxLat = stocksDF_new_v2.select("latitude").map(f => math.ceil(f.getDouble(0))).collect().max
+val minLon = stocksDF_new_v2.select("longitude").map(f => math.floor(f.getDouble(0))).collect().min
+val maxLon = stocksDF_new_v2.select("longitude").map(f => math.ceil(f.getDouble(0))).collect().max
+
+val Dif = 30
 
 
 // COMMAND ----------
