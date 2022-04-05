@@ -85,7 +85,7 @@
 			},
 			"Command": {
 				"type": "string",
-				"defaultValue": "Stop"
+				"defaultValue": "Deallocate"
 			}
 		},
 		"annotations": []
