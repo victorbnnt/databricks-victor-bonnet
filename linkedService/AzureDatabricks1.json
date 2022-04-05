@@ -1,0 +1,13 @@
+{
+	"name": "AzureDatabricks1",
+	"properties": {
+		"annotations": [],
+		"type": "AzureDatabricks",
+		"typeProperties": {
+			"domain": "https://adb-443835289005244.4.azuredatabricks.net",
+			"authentication": "MSI",
+			"workspaceResourceId": "/subscriptions/3214e416-9a48-4db7-9745-1841230b18a4/resourceGroups/databricks-victor-bonnet/providers/Microsoft.Databricks/workspaces/databricksgreathouse",
+			"existingClusterId": "0323-095502-ahqiikrv"
+		}
+	}
+}
