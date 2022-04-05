@@ -29,6 +29,212 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/virtualmachine')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Check Azure VM Status",
+						"type": "WebActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": "@concat('https://management.azure.com/subscriptions/',pipeline().parameters.SubscriptionId,'/resourceGroups/',pipeline().parameters.ResourceGroupName,'/providers/Microsoft.Compute/virtualMachines/',pipeline().parameters.VMName,'/InstanceView?api-version=2020-12-01')",
+							"method": "GET",
+							"headers": {},
+							"authentication": {
+								"type": "MSI",
+								"resource": "https://management.azure.com"
+							}
+						}
+					},
+					{
+						"name": "If Condition1",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Check Azure VM Status",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@or(and(equals(activity('Check Azure VM Status').output.statuses[1].displayStatus,'VM deallocated'), equals(pipeline().parameters.Command,'Start')),and(equals(activity('Check Azure VM Status').output.statuses[1].displayStatus,'VM running'), equals(pipeline().parameters.Command,'Deallocate'))) ",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "Start or pause Azure VM",
+									"type": "WebActivity",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 3,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"url": "@concat('https://management.azure.com/subscriptions/',pipeline().parameters.SubscriptionId,'/resourceGroups/',pipeline().parameters.ResourceGroupName,'/providers/Microsoft.Compute/virtualMachines/',pipeline().parameters.VMName,'/',pipeline().parameters.Command,'?api-version=2020-12-01') ",
+										"method": "POST",
+										"headers": {},
+										"body": {},
+										"authentication": {
+											"type": "MSI",
+											"resource": "https://management.azure.com"
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"SubscriptionId": {
+						"type": "string",
+						"defaultValue": "3214e416-9a48-4db7-9745-1841230b18a4"
+					},
+					"ResourceGroupName": {
+						"type": "string",
+						"defaultValue": "databricks-victor-bonnet"
+					},
+					"Region": {
+						"type": "string",
+						"defaultValue": "eastus"
+					},
+					"VMName": {
+						"type": "string",
+						"defaultValue": "premarket"
+					},
+					"Command": {
+						"type": "string",
+						"defaultValue": "Deallocate"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/VMStart')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Check Azure VM Status",
+						"type": "WebActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": "@concat('https://management.azure.com/subscriptions/',pipeline().parameters.SubscriptionId,'/resourceGroups/',pipeline().parameters.ResourceGroupName,'/providers/Microsoft.Compute/virtualMachines/',pipeline().parameters.VMName,'/InstanceView?api-version=2020-12-01')",
+							"method": "GET",
+							"headers": {},
+							"authentication": {
+								"type": "MSI",
+								"resource": "https://management.azure.com"
+							}
+						}
+					},
+					{
+						"name": "If Condition1",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Check Azure VM Status",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@or(and(equals(activity('Check Azure VM Status').output.statuses[1].displayStatus,'VM deallocated'), equals(pipeline().parameters.Command,'Start')),and(equals(activity('Check Azure VM Status').output.statuses[1].displayStatus,'VM running'), equals(pipeline().parameters.Command,'Deallocate'))) ",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "Start or pause Azure VM",
+									"type": "WebActivity",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 3,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"url": "@concat('https://management.azure.com/subscriptions/',pipeline().parameters.SubscriptionId,'/resourceGroups/',pipeline().parameters.ResourceGroupName,'/providers/Microsoft.Compute/virtualMachines/',pipeline().parameters.VMName,'/',pipeline().parameters.Command,'?api-version=2020-12-01') ",
+										"method": "POST",
+										"headers": {},
+										"body": {},
+										"authentication": {
+											"type": "MSI",
+											"resource": "https://management.azure.com"
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"SubscriptionId": {
+						"type": "string",
+						"defaultValue": "3214e416-9a48-4db7-9745-1841230b18a4"
+					},
+					"ResourceGroupName": {
+						"type": "string",
+						"defaultValue": "databricks-victor-bonnet"
+					},
+					"Region": {
+						"type": "string",
+						"defaultValue": "eastus"
+					},
+					"VMName": {
+						"type": "string",
+						"defaultValue": "premarket"
+					},
+					"Command": {
+						"type": "string",
+						"defaultValue": "Deallocate"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/step1')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
