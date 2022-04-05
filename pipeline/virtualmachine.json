@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "premarket-step1",
+				"name": "Check Azure VM Status",
 				"type": "WebActivity",
 				"dependsOn": [],
 				"policy": {
@@ -28,7 +28,7 @@
 				"type": "IfCondition",
 				"dependsOn": [
 					{
-						"activity": "premarket-step1",
+						"activity": "Check Azure VM Status",
 						"dependencyConditions": [
 							"Succeeded"
 						]
