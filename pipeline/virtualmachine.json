@@ -85,7 +85,7 @@
 			},
 			"Command": {
 				"type": "string",
-				"defaultValue": "Start"
+				"defaultValue": "Stop"
 			}
 		},
 		"annotations": []
