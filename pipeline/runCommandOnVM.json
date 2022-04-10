@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Stop Azure VM",
+				"name": "run command",
 				"type": "WebActivity",
 				"dependsOn": [],
 				"policy": {
