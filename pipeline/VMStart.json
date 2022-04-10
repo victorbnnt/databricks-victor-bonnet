@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Check Azure VM Status",
+				"name": "Start Azure VM",
 				"type": "WebActivity",
 				"dependsOn": [],
 				"policy": {
@@ -15,54 +15,12 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"url": "@concat('https://management.azure.com/subscriptions/',pipeline().parameters.SubscriptionId,'/resourceGroups/',pipeline().parameters.ResourceGroupName,'/providers/Microsoft.Compute/virtualMachines/',pipeline().parameters.VMName,'/InstanceView?api-version=2020-12-01')",
-					"method": "GET",
+					"url": "@concat('https://management.azure.com/subscriptions/',pipeline().parameters.SubscriptionId,'/resourceGroups/',pipeline().parameters.ResourceGroupName,'/providers/Microsoft.Compute/virtualMachines/',pipeline().parameters.VMName,'/',pipeline().parameters.Command,'?api-version=2020-12-01') ",
+					"method": "POST",
 					"authentication": {
 						"type": "MSI",
 						"resource": "https://management.azure.com"
 					}
-				}
-			},
-			{
-				"name": "If Condition1",
-				"type": "IfCondition",
-				"dependsOn": [
-					{
-						"activity": "Check Azure VM Status",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"expression": {
-						"value": "@or(and(equals(activity('Check Azure VM Status').output.statuses[1].displayStatus,'VM deallocated'), equals(pipeline().parameters.Command,'Start')),and(equals(activity('Check Azure VM Status').output.statuses[1].displayStatus,'VM running'), equals(pipeline().parameters.Command,'Deallocate'))) ",
-						"type": "Expression"
-					},
-					"ifTrueActivities": [
-						{
-							"name": "Start or pause Azure VM",
-							"type": "WebActivity",
-							"dependsOn": [],
-							"policy": {
-								"timeout": "7.00:00:00",
-								"retry": 3,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"url": "@concat('https://management.azure.com/subscriptions/',pipeline().parameters.SubscriptionId,'/resourceGroups/',pipeline().parameters.ResourceGroupName,'/providers/Microsoft.Compute/virtualMachines/',pipeline().parameters.VMName,'/',pipeline().parameters.Command,'?api-version=2020-12-01') ",
-								"method": "POST",
-								"authentication": {
-									"type": "MSI",
-									"resource": "https://management.azure.com"
-								}
-							}
-						}
-					]
 				}
 			}
 		],
@@ -85,7 +43,7 @@
 			},
 			"Command": {
 				"type": "string",
-				"defaultValue": "Deallocate"
+				"defaultValue": "Start"
 			}
 		},
 		"annotations": []
