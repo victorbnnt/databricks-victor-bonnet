@@ -16,13 +16,11 @@
 				"userProperties": [],
 				"typeProperties": {
 					"url": {
-						"value": "@concat('https://management.azure.com/subscriptions/',pipeline().parameters.SubscriptionId,'/resourceGroups/',pipeline().parameters.ResourceGroupName,'/providers/Microsoft.Compute/virtualMachines/',pipeline().parameters.VMName,'/',pipeline().parameters.Command,'?api-version=2020-12-01') ",
+						"value": "@concat('https://management.azure.com/subscriptions/',pipeline().parameters.SubscriptionId,'/resourceGroups/',pipeline().parameters.ResourceGroupName,'/providers/Microsoft.Compute/virtualMachines/',pipeline().parameters.VMName,'/runCommand?api-version=2021-07-01') ",
 						"type": "Expression"
 					},
 					"method": "POST",
-					"body": {
-						"VM": "Stop"
-					},
+					"body": "{\n\"commandId\": \"RunShellScript\",\n\"script\":[\"pip install pandas\"]}\n{\n\"commandId\": \"RunShellScript\",\n\"script\":[\"echo 'hello world Number 2' > /home/victorbnnt/helloworld.txt\"]}",
 					"authentication": {
 						"type": "MSI",
 						"resource": "https://management.azure.com"
@@ -49,7 +47,7 @@
 			},
 			"Command": {
 				"type": "string",
-				"defaultValue": "echo \"hello world\""
+				"defaultValue": "ls"
 			}
 		},
 		"annotations": []
