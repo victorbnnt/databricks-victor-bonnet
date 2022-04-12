@@ -54,7 +54,12 @@
 						"type": "Expression"
 					},
 					"method": "POST",
-					"body": "{\n\"commandId\": \"RunShellScript\",\n\"script\":[\"echo 'hello world from '\",$(date), \" >> /home/victorbnnt/helloworld.txt\"]\n}",
+					"body": {
+						"commandId": "RunShellScript",
+						"script": [
+							"echo hello world from $(date) >> /home/victorbnnt/helloworld.txt"
+						]
+					},
 					"authentication": {
 						"type": "MSI",
 						"resource": "https://management.azure.com"
