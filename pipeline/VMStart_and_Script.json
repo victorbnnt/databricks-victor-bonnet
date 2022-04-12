@@ -54,7 +54,7 @@
 						"type": "Expression"
 					},
 					"method": "POST",
-					"body": "{\n\"commandId\": \"RunShellScript\",\n\"script\":[\"pip install pandas\"]}\n{\n\"commandId\": \"RunShellScript\",\n\"script\":[\"echo 'hello world Number 2' > /home/victorbnnt/helloworld.txt\"]}",
+					"body": "{\n\"commandId\": \"RunShellScript\",\n\"script\":[\"pip install pandas\"]}\n{\n\"commandId\": \"RunShellScript\",\n\"script\":[\"echo 'hello world +1' > /home/victorbnnt/helloworld.txt\"]}",
 					"authentication": {
 						"type": "MSI",
 						"resource": "https://management.azure.com"
