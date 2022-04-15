@@ -9,7 +9,10 @@
 				"userProperties": [],
 				"typeProperties": {
 					"variableName": "gru",
-					"value": "\"gra\""
+					"value": {
+						"value": "@\"ezez\".toUpper()",
+						"type": "Expression"
+					}
 				}
 			}
 		],
