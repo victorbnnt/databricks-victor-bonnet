@@ -20,6 +20,10 @@
 			"gru": {
 				"type": "String",
 				"defaultValue": "\"gru\""
+			},
+			"gra": {
+				"type": "String",
+				"defaultValue": "\"gra\""
 			}
 		},
 		"annotations": []
