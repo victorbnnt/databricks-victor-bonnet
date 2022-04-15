@@ -10,7 +10,7 @@
 				"typeProperties": {
 					"variableName": "gru",
 					"value": {
-						"value": "@\"ezez\".toUpper()",
+						"value": "@variables('gra')",
 						"type": "Expression"
 					}
 				}
