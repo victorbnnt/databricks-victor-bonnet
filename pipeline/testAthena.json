@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "customscriptathena",
+				"name": "Custom1",
 				"type": "Custom",
 				"dependsOn": [],
 				"policy": {
@@ -16,10 +16,19 @@
 				"userProperties": [],
 				"typeProperties": {
 					"command": "cmd /C python athena.py",
+					"resourceLinkedService": {
+						"referenceName": "blobstorage",
+						"type": "LinkedServiceReference"
+					},
+					"folderPath": "input",
 					"referenceObjects": {
 						"linkedServices": [],
 						"datasets": []
 					}
+				},
+				"linkedServiceName": {
+					"referenceName": "azurebatchathena",
+					"type": "LinkedServiceReference"
 				}
 			}
 		],
