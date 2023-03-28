@@ -15,7 +15,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"command": "python athena.py",
+					"command": "python test.py",
 					"resourceLinkedService": {
 						"referenceName": "blobstorage",
 						"type": "LinkedServiceReference"
