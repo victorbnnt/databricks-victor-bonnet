@@ -46,7 +46,7 @@
 					"url": "https://athena.hive2.digital4danone.com/api/scenarios/?type=0&cycle_year=2023&cycle_month=3&format=json",
 					"method": "GET",
 					"headers": {
-						"": ""
+						"'accept-language'": "'en,en-US;q=0.9,en-GB;q=0.8'"
 					},
 					"body": {
 						"username": "connect2.0@danone.com",
