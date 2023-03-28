@@ -15,7 +15,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"command": "python test.py",
+					"command": "echo 'test'",
 					"resourceLinkedService": {
 						"referenceName": "blobstorage",
 						"type": "LinkedServiceReference"
