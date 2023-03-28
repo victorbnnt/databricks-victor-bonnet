@@ -42,12 +42,15 @@
 					"secureOutput": false,
 					"secureInput": false
 				},
+				"userProperties": [
+					{
+						"name": "cookies",
+						"value": "{     'csrftoken': 'rNyUrGaBMh5v8hc7wQwv2GIkYRAv8cOEqvI5nVWSSiADCWCWqqGdeF6fiMJszvBA',     'auth-token': '1f7e52e35a5cb72c462dc4a2a9e0c724afa305c7',     'AWSALB': 'hFr3Do9t0yrO8ID4RweOEbDYDqXPIR6YzOwBdfMQdhotClx6wPt3PU/+vtg/bZ8iz4BZkA1bVDJdXqdGFpLrtW2Bk6boL+qQuUokBWM75LHtrVLZuW4ktYAz+iP5',     'AWSALBCORS': 'hFr3Do9t0yrO8ID4RweOEbDYDqXPIR6YzOwBdfMQdhotClx6wPt3PU/+vtg/bZ8iz4BZkA1bVDJdXqdGFpLrtW2Bk6boL+qQuUokBWM75LHtrVLZuW4ktYAz+iP5', }"
+					}
+				],
 				"typeProperties": {
 					"url": "https://athena.hive2.digital4danone.com/api/scenarios/?type=0&cycle_year=2023&cycle_month=3&format=json",
 					"method": "GET",
-					"headers": {
-						"'accept-language'": "'en,en-US;q=0.9,en-GB;q=0.8'"
-					},
 					"body": {
 						"username": "connect2.0@danone.com",
 						"password": "productsourcing"
