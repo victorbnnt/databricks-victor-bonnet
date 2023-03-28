@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Custom1",
+				"name": "customscriptathena",
 				"type": "Custom",
 				"dependsOn": [],
 				"policy": {
@@ -15,6 +15,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
+					"command": "cmd /C python athena.py",
 					"referenceObjects": {
 						"linkedServices": [],
 						"datasets": []
