@@ -42,10 +42,9 @@
 					"secureOutput": false,
 					"secureInput": false
 				},
-				"userProperties": [],
 				"typeProperties": {
 					"url": "https://athena.hive2.digital4danone.com/api/scenarios/?type=0&cycle_year=2023&cycle_month=3&format=json",
-					"method": "POST",
+					"method": "GET",
 					"headers": {
 						"": ""
 					},
