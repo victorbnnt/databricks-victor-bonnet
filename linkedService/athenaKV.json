@@ -1,0 +1,10 @@
+{
+	"name": "athenaKV",
+	"properties": {
+		"annotations": [],
+		"type": "AzureKeyVault",
+		"typeProperties": {
+			"baseUrl": "https://keyvaultathena.vault.azure.net/"
+		}
+	}
+}
