@@ -16,7 +16,10 @@
 				"userProperties": [],
 				"typeProperties": {
 					"url": "https://athena.hive2.digital4danone.com/api/scenarios/demand_overview/",
-					"method": "GET"
+					"method": "GET",
+					"authentication": {
+						"type": "Basic"
+					}
 				}
 			}
 		],
