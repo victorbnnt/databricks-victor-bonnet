@@ -18,7 +18,12 @@
 					"url": "https://athena.hive2.digital4danone.com/api/scenarios/demand_overview/",
 					"method": "GET",
 					"authentication": {
-						"type": "Basic"
+						"type": "Basic",
+						"username": "connect2.0@danone.com",
+						"password": {
+							"type": "SecureString",
+							"value": "**********"
+						}
 					}
 				}
 			}
