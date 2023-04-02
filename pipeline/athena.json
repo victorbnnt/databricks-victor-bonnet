@@ -21,8 +21,13 @@
 						"type": "Basic",
 						"username": "connect2.0@danone.com",
 						"password": {
-							"type": "SecureString",
-							"value": "**********"
+							"type": "AzureKeyVaultSecret",
+							"store": {
+								"referenceName": "athenaKV",
+								"type": "LinkedServiceReference"
+							},
+							"secretName": "athenalogin",
+							"secretVersion": "d467856308dc47fb8aa0498d6f569f9a"
 						}
 					}
 				}
